@@ -14,20 +14,40 @@ uof = read_csv("uof_louisville.csv")
 
 # Question 2
 uof = uof %>% mutate(hour = lubridate::hour(time_of_occurrence))
-uof %>% mutate(hour = lubridate::hour(time_of_occurrence)) %>% tabyl(hour) %>% arrange(desc(n))
-frequent_hour = c(as.integer(23))
+frequent_hour = uof %>% select(hour) %>% 
+  group_by(hour) %>% 
+  count() %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  slice(1) %>% 
+  pull(hour)
 
-uof = uof %>% mutate(month = month(date_of_occurrence))
-uof %>% mutate(month = month(date_of_occurrence)) %>% tabyl(month) %>% arrange(desc(n))
-least_frequent_month = c(as.integer(7))
 
-uof = uof %>% mutate(day = wday(date_of_occurrence))
-uof %>% mutate(day = wday(date_of_occurrence)) %>% tabyl(day) %>% arrange(desc(n))
-most_frequent_day = c(as.integer(1))
+uof = uof %>% mutate(month = lubridate::month(date_of_occurrence))
+least_frequent_month = uof %>% select(month) %>% 
+  group_by(month) %>% 
+  count() %>% 
+  ungroup() %>% 
+  arrange(desc(-n)) %>% 
+  slice(1) %>% 
+  pull(month)
 
-day_distribution = uof %>% 
-  mutate(day = as.integer(day(date_of_occurrence))) %>% tabyl(day) %>% arrange(desc(n)) %>% adorn_totals()
-day_distribution
+
+uof = uof %>% mutate(day = lubridate::wday(date_of_occurrence))
+most_frequent_day = uof %>% select(day) %>% 
+  group_by(day) %>% 
+  count() %>% 
+  ungroup() %>% 
+  arrange(desc(-n)) %>% 
+  slice(1) %>% 
+  pull(day)
+
+
+day_distribution = uof %>% mutate(day = lubridate::day(date_of_occurrence)) %>% 
+  select(day) %>% 
+  tabyl(day) %>% 
+  adorn_totals() %>% 
+  tibble()
 
 # Question 3
 force_used_1 = unique(uof$force_used_1)
@@ -53,10 +73,10 @@ violent_force <- c("take down", "hobble", "ecw cartridge deployed", "knee strike
                    "kick", "deadly force used")
 
 uof = uof %>% mutate(violent_uof_1 = ifelse(force_used_1 %in% violent_force, 1, 0))
-                     
+
 violent_force_service_table = uof %>% filter(violent_uof_1 == 1) %>% 
   tabyl(service_rendered)  %>% 
   arrange(desc(n)) %>% 
   select(service_rendered, n, percent) %>% 
   rename(fraction = percent) %>% 
-  adorn_totals()
+  adorn_totals() %>% tibble()
