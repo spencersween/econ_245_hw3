@@ -32,8 +32,8 @@ least_frequent_month = uof %>% select(month) %>%
   slice(1) %>% 
   pull(month)
 
-uof = uof %>% mutate(day = lubridate::wday(date_of_occurrence))
-most_frequent_day = uof %>% select(day) %>% 
+uof = uof %>% mutate(day = lubridate::wday(date_of_occurrence, label = T))
+most_frequent_day = uof %>% mutate(day = lubridate::wday(date_of_occurrence, label = T)) %>% select(day) %>% 
   group_by(day) %>% 
   count() %>% 
   ungroup() %>% 
@@ -53,7 +53,7 @@ day_distribution = uof %>% mutate(day = lubridate::day(date_of_occurrence)) %>%
 # Question 3
 force_used_1 = unique(uof$force_used_1)
 force_used_2 = unique(uof$force_used_2)
-
+0
 all_force = uof %>%
   select(force_used_1, 
          force_used_2, 
@@ -73,14 +73,13 @@ violent_force <- c("take down", "hobble", "ecw cartridge deployed", "knee strike
                    "12 ga. sock round", "take-down", "impact weapon",
                    "kick", "deadly force used")
 
-uof = uof %>% mutate(violent_uof_1 = ifelse((force_used_1 %in% violent_force) == T, 1, 0))
+uof$violent_uof_1 = ifelse(uof$force_used_1 %in% violent_force, 1, 0)
+uof$violent_uof_1 = ifelse(is.na(uof$force_used_1), NA, uof$violent_uof_1)
 
 violent_force_service_table = uof %>% filter(violent_uof_1 == 1) %>% 
   tabyl(service_rendered)  %>% 
   arrange(desc(n)) %>% 
   select(service_rendered, n, percent) %>% 
   rename(fraction = percent) %>% 
-  adorn_totals()
-
-
-violent_force_service_table
+  adorn_totals() %>% 
+  tibble()
