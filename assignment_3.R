@@ -37,7 +37,7 @@ most_frequent_day = uof %>% select(day) %>%
   group_by(day) %>% 
   count() %>% 
   ungroup() %>% 
-  arrange(desc(-n)) %>% 
+  arrange(desc(n)) %>% 
   slice(1) %>% 
   pull(day)
 
@@ -80,4 +80,7 @@ violent_force_service_table = uof %>% filter(violent_uof_1 == 1) %>%
   arrange(desc(n)) %>% 
   select(service_rendered, n, percent) %>% 
   rename(fraction = percent) %>% 
-  adorn_totals() %>% table()
+  adorn_totals()
+
+
+violent_force_service_table
