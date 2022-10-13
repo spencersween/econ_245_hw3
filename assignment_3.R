@@ -14,40 +14,21 @@ uof = read_csv("uof_louisville.csv")
 
 # Question 2
 uof = uof %>% mutate(hour = hour(time_of_occurrence))
-x = uof %>% 
-  select(hour) %>% 
-  group_by(hour) %>% 
-  summarise(n()) %>%
-  ungroup() %>% top_n(1) %>% 
-  select(hour)
-frequent_hour = c(x[1])
 
-uof = uof %>% mutate(month = month(date_of_occurrence))
-x = uof %>% 
-  select(month) %>% 
-  group_by(month) %>% 
-  summarise(n()) %>%
-  ungroup() %>% top_n(-1) %>% 
-  select(month)
-least_frequent_month = c(x[1])
+uof %>% mutate(hour = hour(time_of_occurrence)) %>% tabyl(hour) %>% arrange(desc(n))
+frequent_hour = c(23)
+is.vector(frequent_hour)
 
-uof = uof %>% mutate(day = wday(date_of_occurrence))
-x = uof %>% 
-  select(day) %>% 
-  group_by(day) %>% 
-  summarise(n()) %>%
-  ungroup() %>% top_n(1) %>% 
-  select(day)
-most_frequent_day = c(x[1])
+uof %>% mutate(month = month(date_of_occurrence)) %>% tabyl(month) %>% arrange(desc(n))
+least_frequent_month = c(7)
+is.vector(least_frequent_month)
 
+
+uof %>% mutate(day = wday(date_of_occurrence)) %>% tabyl(day) %>% arrange(desc(n))
+most_frequent_day = c(1)
 
 day_distribution = uof %>% 
-  mutate(day = day(date_of_occurrence)) %>% 
-  group_by(day) %>% 
-  summarize(n = n()) %>%
-  adorn_totals() %>% 
-  mutate(fraction = n/1000)
-
+  mutate(day = day(date_of_occurrence)) %>% tabyl(day) %>% arrange(desc(n)) %>% adorn_totals()
 
 # Question 3
 force_used_1 = unique(uof$force_used_1)
@@ -72,14 +53,11 @@ violent_force <- c("take down", "hobble", "ecw cartridge deployed", "knee strike
                    "12 ga. sock round", "take-down", "impact weapon",
                    "kick", "deadly force used")
 
-uof = uof %>% mutate(violent_uof_1 = force_used_1 %in% violent_force)
-
-violent_force_service_table = uof %>% 
-  filter(violent_uof_1 == 1) %>% 
-  group_by(service_rendered) %>% 
-  summarize(n = n()) %>% 
-  ungroup() %>% 
-  arrange(-n) %>% 
-  adorn_totals() %>% 
-  mutate(fraction = n/224)
-violent_force_service_table
+uof = uof %>% mutate(violent_uof_1 = ifelse(force_used_1 %in% violent_force, 1, 0))
+                     
+violent_force_service_table = uof %>% filter(violent_uof_1 == 1) %>% 
+  tabyl(service_rendered)  %>% 
+  arrange(desc(n)) %>% 
+  select(service_rendered, n, percent) %>% 
+  rename(fraction = percent) %>% 
+  adorn_totals()
