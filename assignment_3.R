@@ -14,21 +14,22 @@ uof = read_csv("uof_louisville.csv")
 
 # Question 2
 uof = uof %>% mutate(hour = hour(time_of_occurrence))
-
 uof %>% mutate(hour = hour(time_of_occurrence)) %>% tabyl(hour) %>% arrange(desc(n))
 frequent_hour = c(23)
 is.vector(frequent_hour)
 
-uof %>% mutate(month = month(date_of_occurrence)) %>% tabyl(month) %>% arrange(desc(n))
-least_frequent_month = c(7)
+uof = uof %>% mutate(month = month(time_of_occurrence))
+uof %>% mutate(month = month(time_of_occurrence)) %>% tabyl(month) %>% arrange(desc(n))
+least_frequent_month = c(NA)
 is.vector(least_frequent_month)
 
+uof = uof %>% mutate(day = wday(time_of_occurrence))
+uof %>% mutate(day = wday(time_of_occurrence)) %>% tabyl(day) %>% arrange(desc(n))
+most_frequent_day = c(NA)
 
-uof %>% mutate(day = wday(date_of_occurrence)) %>% tabyl(day) %>% arrange(desc(n))
-most_frequent_day = c(1)
 
 day_distribution = uof %>% 
-  mutate(day = day(date_of_occurrence)) %>% tabyl(day) %>% arrange(desc(n)) %>% adorn_totals()
+  mutate(day = day(time_of_occurrence)) %>% tabyl(day) %>% arrange(desc(n)) %>% adorn_totals()
 
 # Question 3
 force_used_1 = unique(uof$force_used_1)
